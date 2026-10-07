@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Pibot</title>
+
+  <style>
+    /* =====================================================
+       RESET
+    ===================================================== */
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    :root{
+      --bg:#050816;
+      --card:rgba(13,19,40,.78);
+      --card-border:rgba(255,255,255,.10);
+      --text:#f7f9ff;
+      --muted:#9da8c2;
+      --blue:#6d7cff;
+      --cyan:#38d9ff;
+      --purple:#a855f7;
+      --green:#42e8a0;
+    }
+
+    html{
+      scroll-behavior:smooth;
+    }
+
+    body{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px 16px;
+
+      color:var(--text);
+      font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+      background:
+        radial-gradient(
+          circle at 15% 15%,
+          rgba(77,91,255,.22),
+          transparent 32%
+        ),
+        radial-gradient(
+          circle at 85% 20%,
+          rgba(0,220,255,.15),
+          transparent 28%
+        ),
+        radial-gradient(
+          circle at 50% 100%,
+          rgba(168,85,247,.18),
+          transparent 35%
+        ),
+        #050816;
+
+      overflow-x:hidden;
+      position:relative;
+    }
+
+
+    /* =====================================================
+       BACKGROUND GRID
+    ===================================================== */
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+
+      background-image:
+        linear-gradient(
+          rgba(255,255,255,.025) 1px,
+          transparent 1px
+        ),
+        linear-gradient(
+          90deg,
+          rgba(255,255,255,.025) 1px,
+          transparent 1px
+        );
+
+      background-size:42px 42px;
+      mask-image:linear-gradient(
+        to bottom,
+        black,
+        transparent 90%
+      );
+
+      pointer-events:none;
+    }
+
+
+    /* =====================================================
+       FLOATING LIGHTS
+    ===================================================== */
+
+    .orb{
+      position:fixed;
+      border-radius:50%;
+      filter:blur(70px);
+      pointer-events:none;
+      opacity:.45;
+    }
+
+    .orb.one{
+      width:180px;
+      height:180px;
+      background:#5865f2;
+      top:-70px;
+      left:-70px;
+    }
+
+    .orb.two{
+      width:160px;
+      height:160px;
+      background:#00c8ff;
+      right:-60px;
+      top:35%;
+    }
+
+    .orb.three{
+      width:190px;
+      height:190px;
+      background:#8b3dff;
+      bottom:-90px;
+      left:25%;
+    }
+
+
+    /* =====================================================
+       MAIN CARD
+    ===================================================== */
+
+    .box{
+      width:100%;
+      max-width:460px;
+
+      position:relative;
+      z-index:2;
+
+      padding:30px;
+
+      border:1px solid var(--card-border);
+      border-radius:26px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(22,29,57,.86),
+          rgba(8,13,30,.82)
+        );
+
+      backdrop-filter:blur(22px);
+      -webkit-backdrop-filter:blur(22px);
+
+      box-shadow:
+        0 30px 80px rgba(0,0,0,.48),
+        inset 0 1px 0 rgba(255,255,255,.07);
+
+      animation:
+        cardIn .7s ease both;
+    }
+
+    @keyframes cardIn{
+      from{
+        opacity:0;
+        transform:translateY(22px) scale(.97);
+      }
+
+      to{
+        opacity:1;
+        transform:translateY(0) scale(1);
+      }
+    }
+
+
+    /* =====================================================
+       TOP BRAND
+    ===================================================== */
+
+    .brand{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+
+      margin-bottom:24px;
+    }
+
+    .brand-icon{
+      width:42px;
+      height:42px;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      border-radius:13px;
+
+      background:
+        linear-gradient(
+          135deg,
+          var(--blue),
+          var(--cyan)
+        );
+
+      box-shadow:
+        0 8px 25px rgba(71,119,255,.35);
+
+      font-size:20px;
+    }
+
+    .brand-name{
+      font-size:18px;
+      font-weight:800;
+      letter-spacing:.4px;
+    }
+
+    .brand-name span{
+      color:var(--cyan);
+    }
+
+
+    /* =====================================================
+       HEADER
+    ===================================================== */
+
+    .header{
+      text-align:center;
+    }
+
+    .header h1{
+      font-size:32px;
+      line-height:1.15;
+      letter-spacing:-.8px;
+
+      margin-bottom:11px;
+    }
+
+    .header h1 span{
+      background:
+        linear-gradient(
+          90deg,
+          #fff,
+          #75ddff,
+          #9d8cff
+        );
+
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+    }
+
+    .subtitle{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.65;
+      max-width:350px;
+      margin:auto;
+    }
+
+
+    /* =====================================================
+       STATUS BADGE
+    ===================================================== */
+
+    .status-badge{
+      width:max-content;
+      margin:20px auto 25px;
+
+      display:flex;
+      align-items:center;
+      gap:8px;
+
+      padding:7px 12px;
+
+      border:1px solid rgba(66,232,160,.18);
+      border-radius:999px;
+
+      background:rgba(66,232,160,.07);
+
+      color:#9af4c9;
+      font-size:11px;
+      font-weight:700;
+    }
+
+    .status-dot{
+      width:7px;
+      height:7px;
+      border-radius:50%;
+      background:var(--green);
+
+      box-shadow:
+        0 0 10px var(--green);
+
+      animation:pulse 1.8s infinite;
+    }
+
+    @keyframes pulse{
+      0%,100%{
+        opacity:1;
+        transform:scale(1);
+      }
+
+      50%{
+        opacity:.45;
+        transform:scale(.72);
+      }
+    }
+
+
+    /* =====================================================
+       FORM
+    ===================================================== */
+
+    .form-group{
+      margin-top:4px;
+    }
+
+    label{
+      display:block;
+      margin-bottom:9px;
+
+      color:#dce3f6;
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .input-wrap{
+      position:relative;
+    }
+
+    .input-icon{
+      position:absolute;
+      left:15px;
+      top:50%;
+      transform:translateY(-50%);
+
+      font-size:17px;
+      opacity:.75;
+
+      pointer-events:none;
+    }
+
+    input{
+      width:100%;
+
+      padding:15px 15px 15px 45px;
+
+      border:1px solid rgba(255,255,255,.09);
+      border-radius:14px;
+
+      outline:none;
+
+      background:
+        rgba(3,8,22,.72);
+
+      color:white;
+
+      font-size:15px;
+
+      transition:
+        border-color .2s,
+        box-shadow .2s,
+        background .2s;
+    }
+
+    input::placeholder{
+      color:#67738f;
+    }
+
+    input:focus{
+      border-color:rgba(91,139,255,.85);
+
+      background:
+        rgba(6,12,30,.9);
+
+      box-shadow:
+        0 0 0 4px rgba(79,108,255,.10),
+        0 8px 25px rgba(0,0,0,.18);
+    }
+
+
+    /* =====================================================
+       PRIVACY NOTICE
+    ===================================================== */
+
+    .notice{
+      margin-top:16px;
+      padding:15px;
+
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:15px;
+
+      background:
+        rgba(255,255,255,.035);
+
+      color:#aeb9d1;
+
+      font-size:12px;
+      line-height:1.65;
+    }
+
+    .notice-title{
+      display:flex;
+      align-items:center;
+      gap:7px;
+
+      margin-bottom:7px;
+
+      color:#e7ecfa;
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .notice strong{
+      color:#dce4f8;
+    }
+
+
+    /* =====================================================
+       BUTTON
+    ===================================================== */
+
+    button{
+      width:100%;
+
+      margin-top:18px;
+      padding:15px;
+
+      border:0;
+      border-radius:14px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #6878ff,
+          #4b9cff
+        );
+
+      color:white;
+
+      font-size:15px;
+      font-weight:800;
+
+      cursor:pointer;
+
+      box-shadow:
+        0 12px 28px rgba(72,105,255,.28);
+
+      transition:
+        transform .2s,
+        box-shadow .2s,
+        filter .2s;
+    }
+
+    button:hover{
+      transform:translateY(-2px);
+
+      box-shadow:
+        0 16px 34px rgba(72,105,255,.38);
+
+      filter:brightness(1.08);
+    }
+
+    button:active{
+      transform:translateY(0);
+    }
+
+    button:disabled{
+      opacity:.65;
+      cursor:not-allowed;
+      transform:none;
+      box-shadow:none;
+    }
+
+
+    /* =====================================================
+       STATUS
+    ===================================================== */
+
+    #status{
+      min-height:22px;
+
+      margin-top:15px;
+
+      text-align:center;
+
+      color:#aeb9d1;
+
+      font-size:13px;
+      line-height:1.5;
+    }
+
+
+    /* =====================================================
+       INFO STRIP
+    ===================================================== */
+
+    .info-strip{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+
+      gap:8px;
+
+      margin-top:24px;
+    }
+
+    .info-item{
+      padding:11px 6px;
+
+      text-align:center;
+
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:12px;
+
+      background:rgba(255,255,255,.025);
+    }
+
+    .info-icon{
+      display:block;
+      margin-bottom:5px;
+      font-size:15px;
+    }
+
+    .info-item span:last-child{
+      color:#7f8ba6;
+      font-size:10px;
+    }
+
+
+    /* =====================================================
+       FOOTER
+    ===================================================== */
+
+    .footer{
+      margin-top:23px;
+
+      text-align:center;
+
+      color:#5e6a84;
+      font-size:10px;
+      letter-spacing:.2px;
+    }
+
+    .footer span{
+      color:#7f8ba6;
+    }
+
+
+    /* =====================================================
+       MOBILE
+    ===================================================== */
+
+    @media(max-width:480px){
+
+      body{
+        padding:16px 12px;
+      }
+
+      .box{
+        padding:25px 20px;
+        border-radius:23px;
+      }
+
+      .header h1{
+        font-size:28px;
+      }
+
+      .subtitle{
+        font-size:13px;
+      }
+
+      .brand{
+        margin-bottom:20px;
+      }
+
+      .info-strip{
+        gap:6px;
+      }
+
+      .info-item{
+        padding:10px 4px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- BACKGROUND LIGHTS -->
+  <div class="orb one"></div>
+  <div class="orb two"></div>
+  <div class="orb three"></div>
+
+
+  <!-- MAIN -->
+  <main class="box">
+
+    <!-- BRAND -->
+    <div class="brand">
+
+      <div class="brand-icon">
+        ✦
+      </div>
+
+      <div class="brand-name">
+        Novaix <span>Website</span>
+      </div>
+
+    </div>
+
+
+    <!-- HEADER -->
+    <header class="header">
+
+      <h1>
+        Selamat Datang <span>👋</span>
+      </h1>
+
+      <p class="subtitle">
+        Haloo 👋, silahkan perkenalkan dirimu dengan mengisi nama di bawah.
+      </p>
+
+    </header>
+
+
+    <!-- STATUS -->
+    <div class="status-badge">
+
+      <span class="status-dot"></span>
+
+      Sistem online
+
+    </div>
+
+
+    <!-- FORM -->
+    <div class="form-group">
+
+      <label for="name">
+        Nama kamu
+      </label>
+
+      <div class="input-wrap">
+
+        <span class="input-icon">
+          👤
+        </span>
+
+        <input
+          id="name"
+          type="text"
+          placeholder="Masukkan nama anda..."
+          maxlength="100"
+          autocomplete="name"
+        >
+
+      </div>
+
+    </div>
+
+
+    <!-- PRIVACY -->
+    <div class="notice">
+
+      <div class="notice-title">
+        🛡️ Privasi & Informaai
+      </div>
+
+      Dengan menekan tombol <strong>"Lanjutkan"</strong>,
+      Kamu akan diarahkan ke page selanjutnya, Jika TIDAK ada perubahan maka masukkan nama yang valid, seperti nama panggilan anda agar website ini dapat mendeteksi prilaku normal & abnormal
+
+      <br><br>
+
+      Website ini <strong>Di Buat untuk mengetahui seberapa kamu akan mengerti seberapa pentingnya menjaga privacy di dunia teknologi ini.</strong>
+
+    </div>
+
+
+    <!-- BUTTON -->
+    <button id="continueBtn">
+      Lanjutkan →
+    </button>
+
+
+    <!-- STATUS -->
+    <div id="status"></div>
+
+
+    <!-- INFO -->
+    <div class="info-strip">
+
+      <div class="info-item">
+        <span class="info-icon">👤</span>
+        <span>1000+ Pengunjung</span>
+      </div>
+
+      <div class="info-item">
+        <span class="info-icon">📱</span>
+        <span>HandPhone<header>
+         
+        </header></span>
+      </div>
+
+      <div class="info-item">
+        <span class="info-icon">🔒</span>
+        <span>Privacy</span>
+      </div>
+
+    </div>
+
+
+    <!-- FOOTER -->
+    <div class="footer">
+      Novaix <span>•</span> akbar idhofi
+    </div>
+
+  </main>
+
+
+
+  <script>
+
+    // =====================================================
+    // URL EDGE FUNCTION SUPABASE
+    // =====================================================
+
+    const API_URL =
+      "https://ffdozkmnvjlfjenfuwct.supabase.co/functions/v1/collect-visitor";
+
+
+    // =====================================================
+    // ELEMENT
+    // =====================================================
+
+    const nameInput =
+      document.getElementById("name");
+
+    const continueBtn =
+      document.getElementById("continueBtn");
+
+    const statusText =
+      document.getElementById("status");
+
+
+    // =====================================================
+    // AMBIL INFORMASI PERANGKAT
+    // =====================================================
+
+    async function getDeviceInfo(){
+
+      let batteryLevel = null;
+      let batteryCharging = null;
+
+      try{
+
+        if(navigator.getBattery){
+
+          const battery =
+            await navigator.getBattery();
+
+          batteryLevel =
+            Math.round(
+              battery.level * 100
+            );
+
+          batteryCharging =
+            battery.charging;
+        }
+
+      }catch(error){
+
+        console.log(
+          "Battery API tidak tersedia."
+        );
+
+      }
+
+
+      return{
+
+        browser:
+          navigator.userAgent,
+
+        language:
+          navigator.language,
+
+        platform:
+          navigator.platform,
+
+        online:
+          navigator.onLine,
+
+        cpu_threads:
+          navigator.hardwareConcurrency || null,
+
+        memory_gb:
+          navigator.deviceMemory || null,
+
+        touch_points:
+          navigator.maxTouchPoints || 0,
+
+        screen_width:
+          window.screen.width,
+
+        screen_height:
+          window.screen.height,
+
+        pixel_ratio:
+          window.devicePixelRatio || 1,
+
+        dark_mode:
+          window.matchMedia(
+            "(prefers-color-scheme: dark)"
+          ).matches,
+
+        reduced_motion:
+          window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+          ).matches,
+
+        battery_level:
+          batteryLevel,
+
+        battery_charging:
+          batteryCharging
+
+      };
+
+    }
+
+
+    // =====================================================
+    // KIRIM DATA
+    // =====================================================
+
+    continueBtn.addEventListener(
+      "click",
+      async function(){
+
+        const name =
+          nameInput.value.trim();
+
+
+        if(!name){
+
+          statusText.textContent =
+            "Masukkan nama terlebih dahulu.";
+
+          nameInput.focus();
+
+          return;
+        }
+
+
+        continueBtn.disabled = true;
+
+        statusText.textContent =
+          "Mengirim data...";
+
+
+        try{
+
+          const device =
+            await getDeviceInfo();
+
+
+          const response =
+            await fetch(API_URL,{
+
+              method:"POST",
+
+              headers:{
+                "Content-Type":
+                  "application/json"
+              },
+
+              body:JSON.stringify({
+
+                name:name,
+
+                device:device
+
+              })
+
+            });
+
+
+          const result =
+            await response.json();
+
+
+          if(!response.ok){
+
+            throw new Error(
+              result.error ||
+              "Gagal mengirim data."
+            );
+
+          }
+
+
+          if(result.success){
+
+            statusText.textContent =
+              "Berhasil. Terima kasih!";
+
+          }else{
+
+            throw new Error(
+              "Data gagal disimpan."
+            );
+
+          }
+
+
+        }catch(error){
+
+          console.error(error);
+
+          statusText.textContent =
+            "Gagal mengirim data. Coba lagi.";
+
+        }finally{
+
+          continueBtn.disabled = false;
+
+        }
+
+      }
+    );
+
+  </script>
+
+</body>
+</html>
